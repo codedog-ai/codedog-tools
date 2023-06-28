@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "codedog-tools"
+version = "0.0.0"
+description = "Development Kits"
+authors = ["Arcadia822 <Arcadia822@Gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "codedog_tools"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openai = "^0.27.8"
+gradio = "^3.35.2"
+fastapi = "^0.98.0"
+pydantic = "^1.10.9"
+langchain = "^0.0.216"
+
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+
+[tool.poetry.scripts]
+startserver = "codedog_tools.server:start"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
