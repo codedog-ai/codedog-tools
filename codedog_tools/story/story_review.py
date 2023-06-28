@@ -12,7 +12,8 @@ with open("env.json") as f:
     env: dict = json.load(f)
     os.environ.update(env["env"])
 
-template = """扮演一名资深产品经理，对以下用户故事进行分析：
+
+input_part = """请作为需求分析专家协助我对以下用户故事进行分析：
 用户故事:
 ```
 {{story}}
@@ -22,25 +23,29 @@ template = """扮演一名资深产品经理，对以下用户故事进行分析
 {{standard}}
 ```
 
-首先，{overview_requirement}
-
-其次，{illustration_requirement}
-
-最后，{mandays_requirement}
+{requirement}
 
 {format}
-""".format(
-    format="""请使用markdown格式进行回答:""",
-    overview_requirement="""简要概括你对这份用户故事以及验收标准的看法""",
-    illustration_requirement="""如果你认为内容中有表述不清的地方，请提出一些问题来协助我们澄清，我会将这些问题转述给产品经理""",
-    mandays_requirement="""请给出你对该用户故事工作量和需求难度的分析""",
-)
+"""
+
+format_part = """请给出你的回答:"""
+
+overview_requirement = """简要概括你对这份用户故事以及验收标准的看法"""
+
+illustration_requirement = """如果你认为这份用户故事以及验收标准有表述的不清晰的地方，请提出一些问题来协助我们澄清"""
+
+mandays_requirement = """请给出你对该用户故事工作量和需求难度的分析"""
+
+overview_template = input_part.format(requirement=overview_requirement, format=format_part)
+illustration_template = input_part.format(requirement=illustration_requirement, format=format_part)
+mandays_template = input_part.format(requirement=mandays_requirement, format=format_part)
 
 
 class StoryReview:
     def __init__(self):
-        prompt = PromptTemplate(input_variables=["story", "standard"], template=template)
-
+        prompt_overview = PromptTemplate(input_variables=["story", "standard"], template=overview_template)
+        prompt_illustration = PromptTemplate(input_variables=["story", "standard"], template=illustration_template)
+        prompt_mandays = PromptTemplate(input_variables=["story", "standard"], template=mandays_template)
         llm = AzureChatOpenAI(
             openai_api_type="azure",
             openai_api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
@@ -51,23 +56,28 @@ class StoryReview:
             temperature=0.2,
         )
 
-        self.storychain = LLMChain(llm=llm, prompt=prompt)
+        self.overview_chain = LLMChain(llm=llm, prompt=prompt_overview)
+        self.illustration_chain = LLMChain(llm=llm, prompt=prompt_illustration)
+        self.mandays_chain = LLMChain(llm=llm, prompt=prompt_mandays)
 
     def review(self, story: str, standard: str) -> Tuple[str, str, str, str]:
         args = {"story": story, "standard": standard}
         telemetry = {"code": 0}
-
         try:
             with get_openai_callback() as cb:
                 t = time.time()
-                result: str = self.storychain.run(args)
+                overview: str = self.overview_chain.run(args)
+                illustration: str = self.illustration_chain.run(args)
+                mandays: str = self.mandays_chain.run(args)
+
                 telemetry["tokens"] = cb.total_tokens
                 telemetry["cost"] = f"$ {cb.total_cost:.4f}"
                 telemetry["time_usage"] = f"{int(time.time() - t)}s"
+
+            return overview, illustration, mandays, json.dumps(telemetry)
         except Exception as e:
             telemetry["code"] = 1
             telemetry["trace"] = traceback.format_exc()
             telemetry["error"] = str(e)
-            result = ""
 
-        return result, telemetry
+        return "", "", "", telemetry

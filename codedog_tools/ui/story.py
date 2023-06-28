@@ -23,10 +23,14 @@ with gr.Blocks() as story_ui:
             with gr.Row():
                 status = gr.JSON(value={"code": 0}, show_label=False)
     with gr.Row():
-        overall_comment = gr.Markdown(label="整体评价", value="")
+        overall_comment = gr.Textbox(label="整体评价", value="", lines=4, max_lines=30, interactive=False)
+    with gr.Row():
+        illustration = gr.Textbox(label="澄清问题", value="", lines=4, max_lines=30, interactive=False)
+    with gr.Row():
+        mandays = gr.Textbox(label="工作量分析", value="", lines=4, max_lines=30, interactive=False)
 
     review.click(
         story.review,
         inputs=[user_story, acceptance_criteria],
-        outputs=[overall_comment, status],
+        outputs=[overall_comment, illustration, mandays, status],
     )
