@@ -1,7 +1,7 @@
 import gradio as gr
 from version import VERSION
 
-from codedog_tools.ui import caseparser_ui, story_ui
+from codedog_tools.ui import caseparser_ui, knowledge_ui, story_ui
 
 with gr.Blocks() as ui:
     with gr.Row():
@@ -9,8 +9,10 @@ with gr.Blocks() as ui:
 
     with gr.Tab(label="用户故事分析"):
         story_ui.render()
-    # with gr.Tab(label="生成测试用例"):
-    # caseparser_ui.render()
+    with gr.Tab(label="生成测试用例"):
+        caseparser_ui.render()
+    with gr.Tab(label="知识库"):
+        knowledge_ui.render()
 
 
 def start():
