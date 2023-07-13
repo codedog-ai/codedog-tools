@@ -17,6 +17,8 @@ with gr.Blocks() as story_ui:
                 user_story = gr.Textbox(label="用户故事", value=default_story, lines=4, max_lines=30)
             with gr.Row():
                 acceptance_criteria = gr.Textbox(label="验收标准", value=default_ac, lines=4, max_lines=30)
+            with gr.Row():
+                detail_doc = gr.UploadButton(label="用户故事详细说明", file_types=["pdf"])
         with gr.Column():
             with gr.Row():
                 review = gr.Button(value="评审")
@@ -31,6 +33,6 @@ with gr.Blocks() as story_ui:
 
     review.click(
         story.review,
-        inputs=[user_story, acceptance_criteria],
+        inputs=[user_story, acceptance_criteria, detail_doc],
         outputs=[overall_comment, illustration, mandays, status],
     )

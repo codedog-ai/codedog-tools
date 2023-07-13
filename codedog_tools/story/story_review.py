@@ -8,11 +8,6 @@ from langchain import LLMChain, PromptTemplate
 from langchain.callbacks import get_openai_callback
 from langchain.chat_models import AzureChatOpenAI
 
-with open("env.json") as f:
-    env: dict = json.load(f)
-    os.environ.update(env["env"])
-
-
 input_part = """请作为需求分析专家协助我对以下用户故事进行分析：
 用户故事:
 ```
@@ -60,14 +55,23 @@ class StoryReview:
         self.illustration_chain = LLMChain(llm=llm, prompt=prompt_illustration)
         self.mandays_chain = LLMChain(llm=llm, prompt=prompt_mandays)
 
-    def review(self, story: str, standard: str) -> Tuple[str, str, str, str]:
+    def review(self, story: str, standard: str, doc) -> Tuple[str, str, str, str]:
         args = {"story": story, "standard": standard}
         telemetry = {"code": 0}
+
+        qa = self.build_qa_chain(doc)
+        illustration_chain = qa is not None and qa or self.illustration_chain
+
+        specification = self.process_doc(doc)
+        if specification:
+            chain = self.build_qa_chain(speicification=specification)
+
         try:
             with get_openai_callback() as cb:
                 t = time.time()
-                overview: str = self.overview_chain.run(args)
-                illustration: str = self.illustration_chain.run(args)
+                # overview: str = self.overview_chain.run(args)
+                overview = ""
+                illustration: str = illustration_chain.run(args)
                 mandays: str = self.mandays_chain.run(args)
 
                 telemetry["tokens"] = cb.total_tokens
@@ -81,3 +85,6 @@ class StoryReview:
             telemetry["error"] = str(e)
 
         return "", "", "", telemetry
+
+    def process_doc(self, doc):
+        pass

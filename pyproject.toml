@@ -22,19 +22,7 @@ flake8 = "^6.0.0"
 isort = "^5.12.0"
 
 [tool.poetry.scripts]
-startserver = "codedog_tools.server:start"
-
-[[tool.poetry.source]]
-name = "aliyun"
-url = "https://mirrors.aliyun.com/pypi/simple/"
-default = false
-secondary = true
-
-[[tool.poetry.source]]
-name = "mirrors"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-default = true
-secondary = false
+startserver = "codedog_tools.server:main"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,23 +1,25 @@
 import gradio as gr
-from version import VERSION
+import uvicorn
+from fastapi import FastAPI
 
-from codedog_tools.ui import caseparser_ui, knowledge_ui, story_ui
+from codedog_tools.ui import story_ui
+from codedog_tools.version import VERSION
 
 with gr.Blocks() as ui:
     with gr.Row():
-        gr.Markdown(f"# AI小工具  v{VERSION}")
+        gr.Markdown(f"# 小工具 v{VERSION}")
 
     with gr.Tab(label="用户故事分析"):
         story_ui.render()
-    with gr.Tab(label="生成测试用例"):
-        caseparser_ui.render()
-    with gr.Tab(label="知识库"):
-        knowledge_ui.render()
 
 
-def start():
-    ui.launch(debug=True, share=False)
+app = FastAPI()
+app = gr.mount_gradio_app(app, ui, path="/")
+
+
+def main():
+    uvicorn.run("codedog_tools.server:app", host="0.0.0.0", port=8000, reload=True)
 
 
 if __name__ == "__main__":
-    start()
+    main()
