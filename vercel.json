@@ -1,0 +1,14 @@
+{
+    "builds": [
+        {
+            "src": "codedog_tools/server.py",
+            "use": "@devjin8/vercel-poetry@latest"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/",
+            "dest": "codedog_tools/server.py"
+        }
+    ]
+}
